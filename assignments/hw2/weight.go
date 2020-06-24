@@ -1,8 +1,9 @@
 package hw2
 
 import (
-	"github.com/gonum/graph"
 	"math"
+
+	"github.com/gonum/graph"
 )
 
 // Weighting is a mapping between a pair of nodes and a weight. It follows the

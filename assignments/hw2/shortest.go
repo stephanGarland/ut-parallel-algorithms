@@ -1,8 +1,9 @@
 package hw2
 
 import (
-	"github.com/gonum/graph"
 	"math"
+
+	"github.com/gonum/graph"
 )
 
 func reverse(p []graph.Node) {
