@@ -16,7 +16,6 @@ type Edge struct {
 type Graph struct {
 	V     int
 	E     int
-	edge  Edge
 	edges []Edge
 }
 
@@ -40,9 +39,9 @@ func BellmanFord(s int, g Graph) {
 
 	for i := 0; i < V; i++ {
 		for j := 0; j < E; j++ {
-			var u = g.edge.src
-			var v = g.edge.dst
-			var w = g.edge.wgt
+			var u = g.edges[j].src
+			var v = g.edges[j].dst
+			var w = g.edges[j].wgt
 			if dist[u] != math.MaxInt64 && dist[u]+w < dist[v] {
 				dist[v] = dist[u] + w
 			}
@@ -50,9 +49,9 @@ func BellmanFord(s int, g Graph) {
 	}
 
 	for i := 0; i < E; i++ {
-		var u = g.edge.src
-		var v = g.edge.dst
-		var w = g.edge.wgt
+		var u = g.edges[i].src
+		var v = g.edges[i].dst
+		var w = g.edges[i].wgt
 		if dist[u] != math.MaxInt64 && dist[u]+w < dist[v] {
 			fmt.Println("Negative cycle detected")
 			return
