@@ -58,9 +58,9 @@ int main (void) {
     float *cuda_in_ptr;
     float *cuda_out_ptr;
     const int ARRAY_SIZE = A.size();
-    const inst ARRAY_BYTES = sizeof int * ARRAY_SIZE;
+    const int ARRAY_BYTES = sizeof int * ARRAY_SIZE;
 
-    cudaMalloc((void**), &cuda_in_ptr, ARRAY_BYTES);
+    cudaMalloc((void**) &cuda_in_ptr, ARRAY_BYTES);
     cudaMemcpy(cuda_in_ptr, A, ARRAY_BYTES, cudaMemcpyHostToDevice);
 
     findMin<<<NUM_BLOCKS, THREADS_PER_BLOCK>>>(cuda_in_ptr);
