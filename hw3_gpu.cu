@@ -70,24 +70,3 @@ int main (void) {
     free(A_from_cuda);
     free(A);
 }
-   
-__global__ void findMin(std::vector<int> *A, unsigned int size) {
-    __shared__ double min[BLOCKSIZE];
-    unsigned int tid = threadIdx.x;
-    unsigned int index = threadIdx.x + (blockDim.x * blockIdx.x);
-    min[tid] = A[index];
-    __syncthreads();
-    unsigned int numThreads = size;
-    for (int j = 1; j < blockDim.x; j *= 2) {
-        int k = 2 * j * tid;
-        if (k < blockDim.x) {
-            if (min[tid + j] < min[tid]) {
-                min[tid] = min[tid + s]
-            }
-        }
-        __syncthreads();
-    }
-    if (tid == 0) {
-        min[blockIdx.x] = min[0];
-    }
-}
