@@ -1,6 +1,7 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 
+
 #include <algorithm>
 #include <cassert>
 #include <iostream>
@@ -15,11 +16,33 @@ using std::endl;
 #define NUM_BLOCKS 2
 #define THREADS_PER_BLOCK 512
 
-int main (int argc, char **argv) {
-    cudaDeviceReset();
+
+__global__ void findMin(int *arr_in, int *arr_out) {
+    unsigned int tid = threadIdx.x;
+    unsigned int index = threadIdx.x + (blockDim.x * blockIdx.x);
+    __syncthreads();
+
+    // This does not yet actually find the minimum; it's a partial implementation of a reduction
+    for (unsigned int s = blockDim.x / 2; s > 0; s >>=1) {
+        if (tid < s) {
+            if (arr_in[index*s] < arr_in[index]) {
+                arr_in[index] = arr_in[index*s];
+            }
+        }
+        __syncthreads();
+    }
+    
+    if (tid == 0) {
+        arr_out[blockIdx.x] = arr_in[0];
+    }
+}
+
+int main (void) {
+
     std::ifstream inp;
     inp.open("./inp.txt");
     std::vector<int> A;
+    std::vector<int> A_from_cuda;
     int num;
     while ((inp >> num) && inp.ignore()) {
         A.push_back(num);
@@ -27,45 +50,44 @@ int main (int argc, char **argv) {
     // inp.ignore() defaults to EOF, and since the example file doesn't include a \n, add the last number
     // But just in case the test does include a newline, don't add anything
     inp.seekg(-1, std::ios_base::end);
-    char c = 0;
+    char c;
     if (c != '\n') {
         A.push_back(num);
     }
 
+    float *cuda_in_ptr;
+    float *cuda_out_ptr;
     const int ARRAY_SIZE = A.size();
-    const int ARRAY_BYTES = sizeof(int) * ARRAY_SIZE;
-    const int OP_BLOCK_ARR_SIZE = NUM_BLOCKS * sizeof(int);
+    const inst ARRAY_BYTES = sizeof int * ARRAY_SIZE;
 
-    // CUDA doesn't have vectors, so pull the data out for an array instead
-    cout << "Input array size = " << ARRAY_SIZE << endl;
-    int *A_for_cuda = A.data();
-    int *A_from_cuda = new int[ARRAY_SIZE];
-    int *cuda_in_ptr;
-    int *cuda_out_ptr;
+    cudaMalloc((void**), &cuda_in_ptr, ARRAY_BYTES);
+    cudaMemcpy(cuda_in_ptr, A, ARRAY_BYTES, cudaMemcpyHostToDevice);
 
-    cudaMalloc((void**) &cuda_in_ptr, ARRAY_BYTES);
-    cudaMalloc((void**) &cuda_out_ptr, OP_BLOCK_ARR_SIZE);
-    cudaMemcpy(cuda_in_ptr, A_for_cuda, ARRAY_BYTES, cudaMemcpyHostToDevice);
-
-    //Perform reduction with in each block
-    findMin<<<NUM_BLOCKS, THREADS_PER_BLOCK, THREADS_PER_BLOCK * sizeof(int)>>>(cuda_in_ptr, cuda_out_ptr);
-    //Perform reduction of the results across blocks
-    findMin<<<1, THREADS_PER_BLOCK, THREADS_PER_BLOCK * sizeof(int)>>>(cuda_out_ptr, cuda_out_ptr);
-
-    int *blocks_output = new int[NUM_BLOCKS];
-    cudaMemcpy(blocks_output, cuda_out_ptr, OP_BLOCK_ARR_SIZE, cudaMemcpyDeviceToHost);
-
-    cout << "First 10 values of original array are: ";
-    for (int i = 0; i < 10; i++) {
-        cout << A_for_cuda[i] << ' ';
-    }
-    cout << endl;
-    cout << "Min : " << blocks_output[0] << endl;
-
-    cout << "Min number in array is: " << A_from_cuda[0] << endl;
+    findMin<<<NUM_BLOCKS, THREADS_PER_BLOCK>>>(cuda_in_ptr);
+    cudaMemcpy(A_from_cuda, cuda_in_ptr, ARRAY_BYTES, cudaMemcpyDeviceToHost);
+    cout << "Min number in array is: " << A_from_cuda[0];
     cudaFree(cuda_in_ptr);
-    cudaFree(cuda_out_ptr);
     free(A_from_cuda);
-    free(blocks_output);
-    cudaDeviceReset();
+    free(A);
+}
+   
+__global__ void findMin(std::vector<int> *A, unsigned int size) {
+    __shared__ double min[BLOCKSIZE];
+    unsigned int tid = threadIdx.x;
+    unsigned int index = threadIdx.x + (blockDim.x * blockIdx.x);
+    min[tid] = A[index];
+    __syncthreads();
+    unsigned int numThreads = size;
+    for (int j = 1; j < blockDim.x; j *= 2) {
+        int k = 2 * j * tid;
+        if (k < blockDim.x) {
+            if (min[tid + j] < min[tid]) {
+                min[tid] = min[tid + s]
+            }
+        }
+        __syncthreads();
+    }
+    if (tid == 0) {
+        min[blockIdx.x] = min[0];
+    }
 }
