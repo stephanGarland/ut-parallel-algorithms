@@ -2,22 +2,29 @@
 #include <cassert>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <vector>
 
 using std::cout;
 using std::endl;
-using std::vector;
 
 int main (void) {
 
-    std::ifstream F;
-    F.open("./inp.txt");
+    std::ifstream inp;
+    inp.open("./inp.txt");
+    std::vector<int> A;
     int num;
-    vector<int> A;
-    // This assumes the input is terminated with newline
-    while ((F >> num) && (F.ignore())) {
+    while ((inp >> num) && inp.ignore()) {
         A.push_back(num);
     }
+    // inp.ignore() defaults to EOF, and since the example file doesn't include a \n, add the last number
+    // But just in case the test does include a newline, don't add anything
+    inp.seekg(-1, std::ios_base::end);
+    char c;
+    if (c != '\n') {
+        A.push_back(num);
+    }
+
     auto minA = *std::min_element(A.begin(), A.end());
     std::vector<int>::iterator iter = std::find(A.begin(), A.end(), minA);
     int pos = std::distance(A.begin(), iter);
@@ -26,7 +33,7 @@ int main (void) {
 	assert(minA == 0);
 	cout << "Min value is " << minA << " at position " << pos << endl;
 
-    vector<int> B(A.size());
+    std::vector<int> B(A.size());
     std::fill(B.begin(), B.end(), A.back());
 	
 	cout << "Last value of A is: " << A.back() << endl;
