@@ -1,12 +1,10 @@
-CPU_CC=g++
-CPU_CFLAGS=-std=c++11
 GPU_CC=nvcc
 
-cpu:
-	$(CPU_CC) $(CPU_CFLAGS) -o hw3_cpu hw3_cpu.cpp
+q1:
+	$(GPU_CC) -o hw3_q1 hw3_q1.cu
 
-gpu:
-	$(GPU_CC) -o hw3_gpu hw3_gpu.cu
+q2:
+	$(GPU_CC) -o hw3_q2 hw3_q2.cu
 
 clean:
-	rm hw3_cpu hw3_gpu
+	rm hw3_q1 hw3_q2
