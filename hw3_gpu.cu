@@ -57,11 +57,12 @@ int main (int argc, char **argv) {
     }
     // inp.ignore() defaults to EOF, and since the example file doesn't include a \n, add the last number
     // But just in case the test does include a newline, don't add anything
-    //inp.seekg(-1, std::ios_base::end);
-    //char c = 0;
-    //if (c != '\n') {
-    //    A.push_back(num);
-    //}
+    inp.seekg(-1, std::ios_base::end);
+    char c;
+    inp.get(c);
+    if (c != '\n') {
+        A.push_back(num);
+    }
     int dev = 0;
     cudaSetDevice(dev);
     cudaDeviceProp devProps;
@@ -81,7 +82,7 @@ int main (int argc, char **argv) {
     BLOCKS = (N + BLOCK_SIZE - 1) / BLOCK_SIZE;
     const int OP_BLOCK_ARR_SIZE = BLOCKS * sizeof(int);
     cout << "Input array size = " << N << endl;
-    cout << "Ouput array size = " << OP_BLOCK_ARR_SIZE << endl;
+    cout << "Output array size = " << OP_BLOCK_ARR_SIZE << endl;
 
     cout << "Number of blocks for the input = " << BLOCKS << endl;
 
@@ -108,11 +109,13 @@ int main (int argc, char **argv) {
     out = (int *)calloc(1, sizeof(int));
     cudaMemcpy(out, cuda_out, sizeof(int), cudaMemcpyDeviceToHost);
 
-    cout << "First 10 values of original array are: ";
-    for (int i = 0; i < 10; i++) {
-        cout << in_arr[i] << ' ';
+    /*
+    cout << "Last 10 in original array are: ";
+    for (int i = N; i > N - 10; i--) {
+        cout << A.data()[i] << ' ';
     }
     cout << endl;
+    */
     cout << "Min number in array is: " << *out << endl;
 
     cudaFree(cuda_in);
