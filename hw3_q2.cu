@@ -183,6 +183,7 @@ int main (int argc, char **argv) {
              }
             cudaEventRecord(stop, 0);
             break;
+            /*
         case 3:
             cout << "*** Executing part 3 of question 2 ***" << endl;
             cudaEventRecord(start, 0);
@@ -192,10 +193,7 @@ int main (int argc, char **argv) {
                 cudaMalloc((void**)) &cuda_interim_arr_case_3, BLOCKS * sizeof(int));
                 groupElementsSharedMem
             }
-
-
-
-
+            */
     }
 
     cudaEventSynchronize(stop);
