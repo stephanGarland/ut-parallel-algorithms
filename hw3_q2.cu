@@ -20,7 +20,7 @@ __global__ void groupElements(int n, int *arr_in, int *arr_out, int iteration, i
     unsigned int index = threadIdx.x + (blockDim.x * blockIdx.x);
 
     if (index < n) {
-        if (arr_in[index] >= startRange && arr_in[index] < endRange) {
+        if (arr_in[index] >= startRange && arr_in[index] <= endRange) {
             atomicAdd(&arr_out[iteration], 1);
         }
     }
@@ -33,7 +33,7 @@ __global__ void groupElementsSharedMem(int n, int *arr_in, int *arr_out, int ite
     __syncthreads();
 
     if (index < n) {
-        if (arr_in[index] >= startRange && arr_in[index] < endRange) {
+        if (arr_in[index] >= startRange && arr_in[index] <= endRange) {
             atomicAdd(&count, 1);
         }
     }
@@ -120,18 +120,31 @@ int main (int argc, char **argv) {
     int *cuda_in;
     int *B;
 
-    Bucket bkt[10]= { {0,0,99},
-                     {1,100,199},
-                     {2,200,299},
-                     {3,300,399},
-                     {4,400,499},
-                     {5,500,599},
-                     {6,600,699},
-                     {7,700,799},
-                     {8,800,899},
-                     {9,900,999},
+    Bucket bkt_case_2[10]= { 
+        {0,0,99},
+        {1,100,199},
+        {2,200,299},
+        {3,300,399},
+        {4,400,499},
+        {5,500,599},
+        {6,600,699},
+        {7,700,799},
+        {8,800,899},
+        {9,900,999},
     };
 
+      Bucket bkt_case_3[10]= { 
+        {0,0,99},
+        {1,0,199},
+        {2,0,299},
+        {3,0,399},
+        {4,0,499},
+        {5,0,599},
+        {6,0,699},
+        {7,0,799},
+        {8,0,899},
+        {9,0,999},
+    };
 
     BLOCKS = (N + BLOCK_SIZE - 1) / BLOCK_SIZE;
     cout << "Blocks : " << BLOCKS << " Block size : " << BLOCK_SIZE << endl;
@@ -148,8 +161,8 @@ int main (int argc, char **argv) {
         case 1: //q2 part 1 - Global memory B
             cout << "*** Executing part 1 of question 2 *** " << endl;
             cudaEventRecord(start, 0);
-            for(int i=0; i<10; i++){
-                Bucket *item = &bkt[i];
+            for (int i = 0; i < 10; i++) {
+                Bucket *item = &bkt_case_2[i];
                 groupElements<<<BLOCKS, BLOCK_SIZE, BLOCK_SIZE * sizeof(int)>>>(N, cuda_in, B, item->id, item->from, item->to);
             }
             cudaEventRecord(stop, 0);
@@ -157,19 +170,32 @@ int main (int argc, char **argv) {
         case 2:
             cout << "*** Executing part 2 of question 2 *** " << endl;
             cudaEventRecord(start, 0);
-            int *cuda_interim_arr;
-             for(int i=0; i<10; i++){
-                 Bucket *item = &bkt[i];
-                 cudaMalloc((void**) &cuda_interim_arr, BLOCKS * sizeof(int));
+            int *cuda_interim_arr_case_2;
+             for(int i = 0; i < 10; i++) {
+                 Bucket *item = &bkt_case_2[i];
+                 cudaMalloc((void**) &cuda_interim_arr_case_2, BLOCKS * sizeof(int));
                  // Step 1. First do the count in per block shared variable
-                 groupElementsSharedMem<<<BLOCKS, BLOCK_SIZE>>>(N, cuda_in, cuda_interim_arr, item->id, item->from, item->to);
+                 groupElementsSharedMem<<<BLOCKS, BLOCK_SIZE>>>(N, cuda_in, cuda_interim_arr_case_2, item->id, item->from, item->to);
 
                  // Step 2. Sum the counts across blocks and store in global B
-                 reduceSum<<<1, BLOCKS, BLOCKS * sizeof(int)>>>(BLOCKS, item->id, cuda_interim_arr, B);
-                 cudaFree(cuda_interim_arr);
+                 reduceSum<<<1, BLOCKS, BLOCKS * sizeof(int)>>>(BLOCKS, item->id, cuda_interim_arr_case_2, B);
+                 cudaFree(cuda_interim_arr_case_2);
              }
             cudaEventRecord(stop, 0);
             break;
+        case 3:
+            cout << "*** Executing part 3 of question 2 ***" << endl;
+            cudaEventRecord(start, 0);
+            int *cuda_interim_arr_case_3;
+            for (int i = 0; i < 10; i++) {
+                Bucket *item = &bkt_case_3[i];
+                cudaMalloc((void**)) &cuda_interim_arr_case_3, BLOCKS * sizeof(int));
+                groupElementsSharedMem
+            }
+
+
+
+
     }
 
     cudaEventSynchronize(stop);
