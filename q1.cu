@@ -37,27 +37,10 @@ __global__ void findMin(int n, int MAX, int *arr_in, int *arr_out) {
     }
 }
 
-__global__ void findLastDigit(int n, int MAX, int *arr_in, int *arr_out) {
-    extern __shared__ int shared_arr[];
+__global__ void findLastDigit(int *arr_in, int *arr_out) {
     unsigned int tid = threadIdx.x;
-    unsigned int index = threadIdx.x + (blockDim.x * blockIdx.x);
-    shared_arr[tid] = MAX;
-    if (index < n) {
-        shared_arr[tid] = arr_in[index];
-    }
-    __syncthreads();
-
-    for (unsigned int s=blockDim.x/2; s>0; s>>=1) {
-        if (tid < s ) {
-            shared_arr[tid] = shared_arr[tid] % 10;
-            __syncthreads();
-        }
-    }
-
-    if (tid == 0) {
-        arr_out[blockIdx.x] = shared_arr[0]; // first element of the shared array contains the reduced value with in the block
-    }
-
+    int ele = arr_in[tid];
+    arr_out[tid] = ele % 10;
 }
 
 int main (int argc, char **argv) {
@@ -70,7 +53,6 @@ int main (int argc, char **argv) {
     int BLOCK_SIZE = 256;
     const char *INPUT_FILE= "./inp.txt";
     std::vector<int> A;
-    std::vector<int> B;
 
     /*
     if(argc==3) {
@@ -118,7 +100,7 @@ int main (int argc, char **argv) {
     cout << "Output array size = " << OP_BLOCK_ARR_SIZE << endl;
     cout << "Number of blocks for the input = " << BLOCKS << endl;
     */
-
+    
     // CUDA doesn't have vectors, so pull the data out for an array instead
     int *in_arr = A.data();
     int *q1a_out;
@@ -155,11 +137,13 @@ int main (int argc, char **argv) {
     //cout << "Min number in array is: " << *q1a_out << endl;
 
     cudaFree(cuda_out);
-    cudaMalloc((void**) &cuda_out, OP_BLOCK_ARR_SIZE);
-    findLastDigit<<<BLOCKS, BLOCK_SIZE, BLOCK_SIZE * sizeof(int)>>>(N, MAX, cuda_in, cuda_out);
-    q1b_out = (int *)calloc(1, sizeof(int));
+    cudaMalloc((void**) &cuda_out, 10000 * sizeof(int));
+    findLastDigit<<<BLOCKS, BLOCK_SIZE, BLOCK_SIZE * sizeof(int)>>>(cuda_in, cuda_out);
+    q1b_out = (int *)calloc(10000, sizeof(int));
     cudaMemcpy(q1b_out, cuda_out, sizeof(int), cudaMemcpyDeviceToHost);
-    q1b << *q1b_out;
+    for (int i = 0; i < sizeof(q1b_out) / sizeof(q1b_out[0]); i++) {
+        q1b << q1b_out[i] << ', ';
+    }
 
     cudaFree(cuda_in);
     cudaFree(cuda_out);
