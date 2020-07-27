@@ -151,62 +151,69 @@ int main (int argc, char **argv) {
 
     cudaMalloc((void**) &cuda_in, ARRAY_BYTES);
     cudaMalloc((void**) &B, 10 * sizeof(int));
+    cudaMalloc((void**) &C, 10 * sizeof(int));
 
     cudaMemcpy(cuda_in, in_arr, ARRAY_BYTES, cudaMemcpyHostToDevice);
 
     cudaEvent_t start, stop;
     cudaEventCreate(&start);
     cudaEventCreate(&stop);
-    switch(whichPart){
-        case 1: //q2 part 1 - Global memory B
-            cout << "*** Executing part 1 of question 2 *** " << endl;
-            cudaEventRecord(start, 0);
-            for (int i = 0; i < 10; i++) {
-                Bucket *item = &bkt_case_2[i];
-                groupElements<<<BLOCKS, BLOCK_SIZE, BLOCK_SIZE * sizeof(int)>>>(N, cuda_in, B, item->id, item->from, item->to);
-            }
-            cudaEventRecord(stop, 0);
-            break;
-        case 2:
-            cout << "*** Executing part 2 of question 2 *** " << endl;
-            cudaEventRecord(start, 0);
-            int *cuda_interim_arr_case_2;
-             for(int i = 0; i < 10; i++) {
-                 Bucket *item = &bkt_case_2[i];
-                 cudaMalloc((void**) &cuda_interim_arr_case_2, BLOCKS * sizeof(int));
-                 // Step 1. First do the count in per block shared variable
-                 groupElementsSharedMem<<<BLOCKS, BLOCK_SIZE>>>(N, cuda_in, cuda_interim_arr_case_2, item->id, item->from, item->to);
 
-                 // Step 2. Sum the counts across blocks and store in global B
-                 reduceSum<<<1, BLOCKS, BLOCKS * sizeof(int)>>>(BLOCKS, item->id, cuda_interim_arr_case_2, B);
-                 cudaFree(cuda_interim_arr_case_2);
-             }
-            cudaEventRecord(stop, 0);
-            break;
-            /*
-        case 3:
-            cout << "*** Executing part 3 of question 2 ***" << endl;
-            cudaEventRecord(start, 0);
-            int *cuda_interim_arr_case_3;
-            for (int i = 0; i < 10; i++) {
-                Bucket *item = &bkt_case_3[i];
-                cudaMalloc((void**)) &cuda_interim_arr_case_3, BLOCKS * sizeof(int));
-                groupElementsSharedMem
-            }
-            */
+    //q2 part 1 - Global memory B
+    cout << "*** Executing part 1 of question 2 *** " << endl;
+    cudaEventRecord(start, 0);
+    for (int i = 0; i < 10; i++) {
+        Bucket *item = &bkt_case_2[i];
+        groupElements<<<BLOCKS, BLOCK_SIZE, BLOCK_SIZE * sizeof(int)>>>(N, cuda_in, B, item->id, item->from, item->to);
+    }
+    cudaEventRecord(stop, 0);
+
+    cout << "*** Executing part 2 of question 2 *** " << endl;
+    cudaEventRecord(start, 0);
+    int *cuda_interim_arr_case_2;
+        for(int i = 0; i < 10; i++) {
+            Bucket *item = &bkt_case_2[i];
+            cudaMalloc((void**) &cuda_interim_arr_case_2, BLOCKS * sizeof(int));
+            // Step 1. First do the count in per block shared variable
+            groupElementsSharedMem<<<BLOCKS, BLOCK_SIZE>>>(N, cuda_in, cuda_interim_arr_case_2, item->id, item->from, item->to);
+
+            // Step 2. Sum the counts across blocks and store in global B
+            reduceSum<<<1, BLOCKS, BLOCKS * sizeof(int)>>>(BLOCKS, item->id, cuda_interim_arr_case_2, B);
+            cudaFree(cuda_interim_arr_case_2);
+        }
+    cudaEventRecord(stop, 0);
+
+    cout << "*** Executing part 3 of question 2 ***" << endl;
+    cudaMemcpy(cuda_in, B, ARRAY_BYTES, cudaMemcpyHostToDevice);
+    cudaEventRecord(start, 0);
+    int *cuda_interim_arr_case_3;
+    for (int i = 0; i < 10; i++) {
+        Bucket *item = &bkt_case_3[i];
+        cudaMalloc((void**)) &cuda_interim_arr_case_3, BLOCKS * sizeof(int));
+        groupElementsSharedMem<<<BLOCKS, BLOCK_SIZE>>>(N, cuda_in, cuda_interim_arr_case_3, item->id, item->from, item->to);
+        reduceSum<<<1, BLOCKS, BLOCKS * sizeof(int)>>>(BLOCKS, item->id, cuda_interim_arr_case_3, C);
+        cudaFree(cuda_interim_arr_case32);
     }
 
     cudaEventSynchronize(stop);
     float elapsedTime;
     cudaEventElapsedTime(&elapsedTime, start, stop);
 
-    int *out_arr = new int[10];
-    cudaMemcpy(out_arr, B, 10*sizeof(int), cudaMemcpyDeviceToHost);
-
-    cout << "output array B : ";
+    int *out_arr_B = new int[10];
+    cudaMemcpy(out_arr_B, B, 10*sizeof(int), cudaMemcpyDeviceToHost);
+    cout << "\noutput array B : ";
 
     for (int i = 0; i < 10; i++) {
-        cout << out_arr[i] << ' ';
+        cout << out_arr_B[i] << ' ';
+    }
+    cout << endl;
+
+    int *out_arr_C = new int[10];
+    cudaMemcpy(out_arr_C, C, 10*sizeof(int), cudaMemcpyDeviceToHost);
+    cout << "\noutput array C : ";
+
+    for (int i = 0; i < 10; i++) {
+        cout << out_arr_C[i] << ' ';
     }
     cout << endl;
 
@@ -214,6 +221,8 @@ int main (int argc, char **argv) {
 
     cudaFree(cuda_in);
     cudaFree(B);
-    free(out_arr);
+    cudaFree(C);
+    free(out_arr_B);
+    free(out_arr_C);
     cudaDeviceReset();
 }
