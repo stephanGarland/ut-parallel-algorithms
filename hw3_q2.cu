@@ -72,14 +72,9 @@ int main (int argc, char **argv) {
     int BLOCKS = 4;
     int BLOCK_SIZE = 256;
     const char *INPUT_FILE= "./inp.txt";
-    int whichPart = 1;
     std::vector<int> A;
 
-    if(argc == 2){
-        whichPart = atoi(argv[1]);
-    }
-    if(argc == 4) {
-        whichPart = atoi(argv[1]);
+    if(argc == 3) {
         BLOCK_SIZE = atoi(argv[2]);
         INPUT_FILE = argv[3];
     }
@@ -119,6 +114,7 @@ int main (int argc, char **argv) {
     int *in_arr = A.data();
     int *cuda_in;
     int *B;
+    int *C;
 
     Bucket bkt_case_2[10]= { 
         {0,0,99},
@@ -192,7 +188,7 @@ int main (int argc, char **argv) {
         cudaMalloc((void**)) &cuda_interim_arr_case_3, BLOCKS * sizeof(int));
         groupElementsSharedMem<<<BLOCKS, BLOCK_SIZE>>>(N, cuda_in, cuda_interim_arr_case_3, item->id, item->from, item->to);
         reduceSum<<<1, BLOCKS, BLOCKS * sizeof(int)>>>(BLOCKS, item->id, cuda_interim_arr_case_3, C);
-        cudaFree(cuda_interim_arr_case32);
+        cudaFree(cuda_interim_arr_3);
     }
 
     cudaEventSynchronize(stop);
