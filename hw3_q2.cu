@@ -185,10 +185,10 @@ int main (int argc, char **argv) {
     int *cuda_interim_arr_case_3;
     for (int i = 0; i < 10; i++) {
         Bucket *item = &bkt_case_3[i];
-        cudaMalloc((void**)) &cuda_interim_arr_case_3, BLOCKS * sizeof(int));
+        cudaMalloc((void**) &cuda_interim_arr_case_3, BLOCKS * sizeof(int));
         groupElementsSharedMem<<<BLOCKS, BLOCK_SIZE>>>(N, cuda_in, cuda_interim_arr_case_3, item->id, item->from, item->to);
         reduceSum<<<1, BLOCKS, BLOCKS * sizeof(int)>>>(BLOCKS, item->id, cuda_interim_arr_case_3, C);
-        cudaFree(cuda_interim_arr_3);
+        cudaFree(cuda_interim_arr_case_3);
     }
 
     cudaEventSynchronize(stop);
