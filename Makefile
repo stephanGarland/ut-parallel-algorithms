@@ -1,10 +1,10 @@
 GPU_CC=nvcc
 
 q1:
-	$(GPU_CC) -o hw3_q1 hw3_q1.cu
+	$(GPU_CC) -o q1 q1.cu
 
 q2:
-	$(GPU_CC) -o hw3_q2 hw3_q2.cu
+	$(GPU_CC) -o q2 q2.cu
 
 clean:
-	rm hw3_q1 hw3_q2
+	rm q1 q2
