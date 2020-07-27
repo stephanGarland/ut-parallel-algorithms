@@ -94,8 +94,8 @@ int main (int argc, char **argv) {
     }
     int dev = 0;
     cudaSetDevice(dev);
-    cudaDeviceProp devProps;
     /*
+    cudaDeviceProp devProps;
     if (cudaGetDeviceProperties(&devProps, dev) == 0)
     {
         printf("Using device %d:\n", dev);
@@ -121,7 +121,8 @@ int main (int argc, char **argv) {
 
     // CUDA doesn't have vectors, so pull the data out for an array instead
     int *in_arr = A.data();
-    int *out;
+    int *q1a_out;
+    int *q1b_out;
     int *cuda_in;
     int *cuda_out;
 
@@ -158,10 +159,11 @@ int main (int argc, char **argv) {
     findLastDigit<<<BLOCKS, BLOCK_SIZE, BLOCK_SIZE * sizeof(int)>>>(N, MAX, cuda_in, cuda_out);
     q1b_out = (int *)calloc(1, sizeof(int));
     cudaMemcpy(q1b_out, cuda_out, sizeof(int), cudaMemcpyDeviceToHost);
-    q1b << *q1B_out;
+    q1b << *q1b_out;
 
     cudaFree(cuda_in);
     cudaFree(cuda_out);
-    free(out);
+    free(q1a_out);
+    free(q1b_out);
     cudaDeviceReset();
 }
