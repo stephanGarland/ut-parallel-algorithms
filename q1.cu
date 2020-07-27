@@ -40,6 +40,9 @@ __global__ void findMin(int n, int MAX, int *arr_in, int *arr_out) {
 int main (int argc, char **argv) {
     cudaDeviceReset();
     std::ifstream inp;
+    std::ofstream q1a("./q1a.txt");
+    std::ofstream q1b("./q1b.txt");
+
     int BLOCKS = 4;
     int BLOCK_SIZE = 256;
     const char *INPUT_FILE= "./inp.txt";
@@ -81,10 +84,12 @@ int main (int argc, char **argv) {
     // calculate the block size
     BLOCKS = (N + BLOCK_SIZE - 1) / BLOCK_SIZE;
     const int OP_BLOCK_ARR_SIZE = BLOCKS * sizeof(int);
+
+    /*
     cout << "Input array size = " << N << endl;
     cout << "Output array size = " << OP_BLOCK_ARR_SIZE << endl;
-
     cout << "Number of blocks for the input = " << BLOCKS << endl;
+    */
 
     // CUDA doesn't have vectors, so pull the data out for an array instead
     int *in_arr = A.data();
@@ -116,7 +121,9 @@ int main (int argc, char **argv) {
     }
     cout << endl;
     */
-    cout << "Min number in array is: " << *out << endl;
+    q1a << *out;
+
+    //cout << "Min number in array is: " << *out << endl;
 
     cudaFree(cuda_in);
     cudaFree(cuda_out);
