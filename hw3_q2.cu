@@ -156,7 +156,7 @@ int main (int argc, char **argv) {
     cudaEventCreate(&stop);
 
     //q2 part 1 - Global memory B
-    cout << "*** Executing part 1 of question 2 *** " << endl;
+    cout << "\n*** Executing part 1 of question 2 *** " << endl;
     cudaEventRecord(start, 0);
     for (int i = 0; i < 10; i++) {
         Bucket *item = &bkt_case_2[i];
@@ -164,7 +164,7 @@ int main (int argc, char **argv) {
     }
     cudaEventRecord(stop, 0);
 
-    cout << "*** Executing part 2 of question 2 *** " << endl;
+    cout << "\n*** Executing part 2 of question 2 *** " << endl;
     cudaEventRecord(start, 0);
     int *cuda_interim_arr_case_2;
         for(int i = 0; i < 10; i++) {
@@ -179,7 +179,7 @@ int main (int argc, char **argv) {
         }
     cudaEventRecord(stop, 0);
 
-    cout << "*** Executing part 3 of question 2 ***" << endl;
+    cout << "\n*** Executing part 3 of question 2 ***" << endl;
     cudaMemcpy(cuda_in, B, ARRAY_BYTES, cudaMemcpyHostToDevice);
     cudaEventRecord(start, 0);
     int *cuda_interim_arr_case_3;
