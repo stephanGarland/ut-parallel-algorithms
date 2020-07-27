@@ -37,6 +37,29 @@ __global__ void findMin(int n, int MAX, int *arr_in, int *arr_out) {
     }
 }
 
+__global__ void findLastDigit(int n, int MAX, int *arr_in, int *arr_out) {
+    extern __shared__ int shared_arr[];
+    unsigned int tid = threadIdx.x;
+    unsigned int index = threadIdx.x + (blockDim.x * blockIdx.x);
+    shared_arr[tid] = MAX;
+    if (index < n) {
+        shared_arr[tid] = arr_in[index];
+    }
+    __syncthreads();
+
+    for (unsigned int s=blockDim.x/2; s>0; s>>=1) {
+        if (tid < s ) {
+            shared_arr[tid] = shared_arr[tid] % 10;
+            __syncthreads();
+        }
+    }
+
+    if (tid == 0) {
+        arr_out[blockIdx.x] = shared_arr[0]; // first element of the shared array contains the reduced value with in the block
+    }
+
+}
+
 int main (int argc, char **argv) {
     cudaDeviceReset();
     std::ifstream inp;
@@ -47,11 +70,14 @@ int main (int argc, char **argv) {
     int BLOCK_SIZE = 256;
     const char *INPUT_FILE= "./inp.txt";
     std::vector<int> A;
+    std::vector<int> B;
 
+    /*
     if(argc==3) {
         BLOCK_SIZE = atoi(argv[1]);
         INPUT_FILE = argv[2];
     }
+    */
 
     inp.open(INPUT_FILE);
     int num;
@@ -69,6 +95,7 @@ int main (int argc, char **argv) {
     int dev = 0;
     cudaSetDevice(dev);
     cudaDeviceProp devProps;
+    /*
     if (cudaGetDeviceProperties(&devProps, dev) == 0)
     {
         printf("Using device %d:\n", dev);
@@ -77,6 +104,7 @@ int main (int argc, char **argv) {
                (int)devProps.major, (int)devProps.minor,
                (int)devProps.clockRate);
     }
+    */
 
     const int N = A.size();
     const int ARRAY_BYTES = sizeof(int) * N;
@@ -111,8 +139,8 @@ int main (int argc, char **argv) {
         findMin<<<1, BLOCK_SIZE, BLOCK_SIZE * sizeof(int)>>>(N, MAX, cuda_out, cuda_out);
     }
 
-    out = (int *)calloc(1, sizeof(int));
-    cudaMemcpy(out, cuda_out, sizeof(int), cudaMemcpyDeviceToHost);
+    q1a_out = (int *)calloc(1, sizeof(int));
+    cudaMemcpy(q1a_out, cuda_out, sizeof(int), cudaMemcpyDeviceToHost);
 
     /*
     cout << "Last 10 in original array are: ";
@@ -121,9 +149,16 @@ int main (int argc, char **argv) {
     }
     cout << endl;
     */
-    q1a << *out;
+    q1a << *q1a_out;
 
-    //cout << "Min number in array is: " << *out << endl;
+    //cout << "Min number in array is: " << *q1a_out << endl;
+
+    cudaFree(cuda_out);
+    cudaMalloc((void**) &cuda_out, OP_BLOCK_ARR_SIZE);
+    findLastDigit<<<BLOCKS, BLOCK_SIZE, BLOCK_SIZE * sizeof(int)>>>(N, MAX, cuda_in, cuda_out);
+    q1b_out = (int *)calloc(1, sizeof(int));
+    cudaMemcpy(q1b_out, cuda_out, sizeof(int), cudaMemcpyDeviceToHost);
+    q1b << *q1B_out;
 
     cudaFree(cuda_in);
     cudaFree(cuda_out);
