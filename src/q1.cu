@@ -51,7 +51,7 @@ int main (int argc, char **argv) {
 
     int BLOCKS = 4;
     int BLOCK_SIZE = 256;
-    const char *INPUT_FILE= "./src/inp.txt";
+    const char *INPUT_FILE= "./inp/inp.txt";
     std::vector<int> A;
 
     /*

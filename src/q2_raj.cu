@@ -102,7 +102,7 @@ int main (int argc, char **argv) {
     std::ifstream inp;
     int BLOCKS = 4; // Number of blocks are calculated based on input size below
     int BLOCK_SIZE = 256;
-    const char *INPUT_FILE= "./src/inp.txt";
+    const char *INPUT_FILE= "./inp/inp.txt";
     std::vector<int> A;
 
     inp.open(INPUT_FILE);
