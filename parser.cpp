@@ -19,6 +19,8 @@ int main() {
 
     inp.open("./inp.gr");
     buffer << inp.rdbuf();
+
+    // Thank you to Killzone Kid @ https://stackoverflow.com/a/49201823/4221094
     std::string const delims{" \n"};
     size_t beg, pos = 0;
     while ((beg = buffer.str().find_first_not_of(delims, pos)) != std::string::npos) {
