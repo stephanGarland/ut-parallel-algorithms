@@ -71,7 +71,7 @@ int main (int argc, char **argv) {
     std::ifstream inp;
     int BLOCKS = 4;
     int BLOCK_SIZE = 256;
-    const char *INPUT_FILE= "./inp.txt";
+    const char *INPUT_FILE= "./src/inp.txt";
     std::vector<int> A;
 
     if(argc == 3) {

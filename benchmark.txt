@@ -1,5 +1,0 @@
-time ./hw3 || time ./hw3_cpu
-
-Results are realtime
-Device: 0.269,0.214,0.262; Avg: 0.248
-Host: 0.002,0.002,0.002; Avg: 0.002
