@@ -2,6 +2,6 @@ CC = g++-9
 CFLAGS = -std=c++11 -Wall
 
 parser:
-	$(CC) $(CFLAGS) -o parser parser.cpp
+	$(CC) $(CFLAGS) -o ./bin/parser ./src/parser.cpp
 clean:
-	rm parser
+	rm ./bin/parser

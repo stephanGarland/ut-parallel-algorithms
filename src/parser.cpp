@@ -17,7 +17,7 @@ int main() {
     std::vector<std::string> inpTokens;
     std::map<int, std::map<std::string, int>> edges;
 
-    inp.open("./inp.gr");
+    inp.open("./inp/example.gr");
     buffer << inp.rdbuf();
 
     // Thank you to Killzone Kid @ https://stackoverflow.com/a/49201823/4221094
