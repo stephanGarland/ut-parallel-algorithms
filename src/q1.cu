@@ -51,7 +51,7 @@ int main (int argc, char **argv) {
 
     int BLOCKS = 4;
     int BLOCK_SIZE = 256;
-    const char *INPUT_FILE= "./inp/inp.txt";
+    const char *INPUT_FILE= "../inp/inp.txt";
     std::vector<int> A;
 
     /*
@@ -142,7 +142,7 @@ int main (int argc, char **argv) {
     q1b_out = (int *)calloc(10000, sizeof(int));
     cudaMemcpy(q1b_out, cuda_out, sizeof(int), cudaMemcpyDeviceToHost);
     for (int i = 0; i < sizeof(q1b_out) / sizeof(q1b_out[0]); i++) {
-        q1b << q1b_out[i] << ', ';
+        q1b << q1b_out[i] << ", ";
     }
 
     cudaFree(cuda_in);
