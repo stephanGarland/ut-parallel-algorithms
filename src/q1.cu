@@ -37,10 +37,12 @@ __global__ void findMin(int n, int MAX, int *arr_in, int *arr_out) {
     }
 }
 
-__global__ void findLastDigit(int *arr_in, int *arr_out) {
+__global__ void findLastDigit(int n, int *arr_in, int *arr_out) {
     unsigned int tid = threadIdx.x;
-    int ele = arr_in[tid];
-    arr_out[tid] = ele % 10;
+    unsigned int index = threadIdx.x + (blockDim.x * blockIdx.x);
+    if (index < n) {
+        arr_out[tid] = arr_in[tid] % 10;
+    }
 }
 
 int main (int argc, char **argv) {
@@ -137,14 +139,18 @@ int main (int argc, char **argv) {
     //cout << "Min number in array is: " << *q1a_out << endl;
 
     cudaFree(cuda_out);
-    cudaMalloc((void**) &cuda_out, 10000 * sizeof(int));
-    findLastDigit<<<BLOCKS, BLOCK_SIZE, BLOCK_SIZE * sizeof(int)>>>(cuda_in, cuda_out);
+    cudaMalloc((void**) &cuda_out, ARRAY_BYTES);
+    findLastDigit<<<BLOCKS, BLOCK_SIZE, BLOCK_SIZE * sizeof(int)>>>(N, cuda_in, cuda_out);
+
     q1b_out = (int *)calloc(10000, sizeof(int));
+    cout << "\nSize of q1b_out was: " << sizeof(q1b_out) << endl;
     cudaMemcpy(q1b_out, cuda_out, sizeof(int), cudaMemcpyDeviceToHost);
     for (int i = 0; i < sizeof(q1b_out) / sizeof(q1b_out[0]); i++) {
-        q1b << q1b_out[i] << ", ";
+        //q1b << q1b_out[i] << ", ";
+        // for troubleshooting
+        cout << q1b_out[i] << ", ";
     }
-
+    cout << "\nSize of q1b_out is: " << sizeof(q1b_out) << endl;
     cudaFree(cuda_in);
     cudaFree(cuda_out);
     free(q1a_out);
