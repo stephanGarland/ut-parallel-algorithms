@@ -1,7 +1,12 @@
 CC = g++-9
 CFLAGS = -std=c++11 -Wall
 
-parser:
-	$(CC) $(CFLAGS) -o ./bin/parser ./src/parser.cpp
+build: parser.o CSRGraphV2.o
+	$(CC) $(CFLAGS) -o ./bin/parser parser.o CSRGraphV2.o
+	rm *.o
+parser.o:
+	$(CC) -c ./src/parser.cpp
+CSRGraphV2.o:
+	$(CC) -c ./src/csr/CSRGraphV2.cpp
 clean:
 	rm ./bin/parser
