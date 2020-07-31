@@ -5,8 +5,8 @@ build: parser.o CSRGraphV2.o
 	$(CC) $(CFLAGS) -o ./bin/parser parser.o CSRGraphV2.o
 	rm *.o
 parser.o:
-	$(CC) -c ./src/parser.cpp
+	$(CC) $(CFLAGS) -c ./src/parser.cpp
 CSRGraphV2.o:
-	$(CC) -c ./src/csr/CSRGraphV2.cpp
+	$(CC) $(CFLAGS) -c ./src/csr/CSRGraphV2.cpp
 clean:
 	rm ./bin/parser
