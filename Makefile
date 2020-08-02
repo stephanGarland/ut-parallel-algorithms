@@ -1,12 +1,19 @@
-CC = g++-9
-CFLAGS = -std=c++11 -Wall
+CC       = g++-9
+CFLAGS   = -std=c++11 -Wall
+PROGNAME = parser
+OFILES   = $(patsubst %.cpp,%.o,$(wildcard src/*.cpp))
 
-build: parser.o bellmanford.o
-	$(CC) $(CFLAGS) -o ./bin/parser parser.o bellmanford.o
-	rm *.o
-parser.o:
-	$(CC) $(CFLAGS) -c ./src/parser.cpp
-bellmanford.o:
-	$(CC) $(CFLAGS) -c ./src/bellmanford.cpp
+vpath %.cpp src
+
+build:
+	@make $(PROGNAME)
+
+$(PROGNAME): $(OFILES)
+	$(CC) $(CFLAGS) -o ./bin/$(PROGNAME) $(OFILES)
+
+%.o: %.cpp
+	$(CC) $(CFLAGS) -c -o $@ $<
+
 clean:
 	rm ./bin/parser
+	rm *.o
